@@ -149,4 +149,3 @@ Tento projekt je vytvořen jako semestrální práce a není určen pro komerčn
 ## Autoři
 
 - Mike (2024)
-- [Tvůj GitHub profil nebo kontakt]
