@@ -6,6 +6,7 @@ export abstract class NoteModel implements BaseNote {
   title: string;
   createdAt: Date;
   updatedAt: Date;
+  completed: boolean;
   color?: string;
   tags?: string[];
   userId: string;
@@ -16,6 +17,7 @@ export abstract class NoteModel implements BaseNote {
     this.title = data.title || 'Untitled Note';
     this.createdAt = data.createdAt || new Date();
     this.updatedAt = data.updatedAt || new Date();
+    this.completed = data.completed || false;
     this.color = data.color;
     this.tags = data.tags || [];
     this.userId = data.userId || '';
@@ -54,6 +56,7 @@ export abstract class NoteModel implements BaseNote {
       title: this.title,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
+      completed: this.completed,
       color: this.color,
       tags: this.tags,
       userId: this.userId,

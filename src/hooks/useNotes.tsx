@@ -39,6 +39,10 @@ export function useNotes(session: Session | null) {
   // ===== STATE PRO ÚPRAVU TODO POLOŽEK =====
   const [editingTodoItem, setEditingTodoItem] = useState<{noteId: string, itemId: string, text: string} | null>(null);
 
+  // ===== STATE PRO EDITACI POZNÁMEK =====
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   // ===== STATE PRO DRAG & DROP =====
   const [draggedNote, setDraggedNote] = useState<string | null>(null);
   const [dragOverNote, setDragOverNote] = useState<string | null>(null);
@@ -172,6 +176,44 @@ export function useNotes(session: Session | null) {
       }
       return note;
     }));
+  };
+
+  // ===== FUNKCE PRO EDITACI POZNÁMEK =====
+  
+  /**
+   * Otevření modalu pro editaci poznámky
+   */
+  const handleEditNote = (note: Note) => {
+    setEditingNote(note);
+    setIsEditModalOpen(true);
+  };
+
+  /**
+   * Uložení změn v editované poznámce
+   */
+  const handleSaveNoteEdit = (updatedNote: Note) => {
+    setNotes(prev => prev.map(note => 
+      note.id === updatedNote.id ? updatedNote : note
+    ));
+    setEditingNote(null);
+    setIsEditModalOpen(false);
+  };
+
+  /**
+   * Zavření modalu pro editaci
+   */
+  const handleCloseEditModal = () => {
+    setEditingNote(null);
+    setIsEditModalOpen(false);
+  };
+
+  /**
+   * Přepnutí stavu dokončení poznámky
+   */
+  const handleToggleNoteCompleted = (noteId: string) => {
+    setNotes(prev => prev.map(note => 
+      note.id === noteId ? { ...note, completed: !note.completed, updatedAt: new Date() } : note
+    ));
   };
 
   /**
@@ -340,6 +382,8 @@ export function useNotes(session: Session | null) {
     newImageCaption,
     selectedCategory,
     editingTodoItem,
+    editingNote,
+    isEditModalOpen,
     draggedNote,
     dragOverNote,
     
@@ -362,6 +406,10 @@ export function useNotes(session: Session | null) {
     handleCancelTodoItemEdit,
     handleAddTodoItem,
     handleDeleteTodoItem,
+    handleEditNote,
+    handleSaveNoteEdit,
+    handleCloseEditModal,
+    handleToggleNoteCompleted,
     handleCreateNote,
     handleArchiveNote,
     handleRestoreNote,

@@ -26,6 +26,7 @@ export interface BaseNote {
   createdAt: Date; // Datum vytvoření
   updatedAt: Date; // Datum poslední úpravy
   userId: string; // ID uživatele, který poznámku vytvořil
+  completed: boolean; // Zda je poznámka dokončená
   color?: string; // ID kategorie/barvy (volitelné)
   tags?: string[]; // Tagy pro kategorizaci (volitelné)
 }

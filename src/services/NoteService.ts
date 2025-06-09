@@ -29,6 +29,7 @@ export class NoteService {
       userId,
       createdAt: new Date(),
       updatedAt: new Date(),
+      completed: false,
       color: undefined,
       tags: []
     };

@@ -23,6 +23,7 @@ import { StatsPage } from './pages/StatsPage';
 import { Header } from './components/Header';
 import { NoteCard } from './components/NoteCard';
 import { NoteForm } from './components/NoteForm';
+import { NoteEditModal } from './components/NoteEditModal';
 import { useNotes } from './hooks/useNotes';
 import type { Session } from './types/User';
 import type { Note } from './types/Note';
@@ -248,6 +249,7 @@ export function App() {
                           isDragged={notesHook.draggedNote === note.id}
                           isDragOver={notesHook.dragOverNote === note.id}
                           onNoteClick={handleNoteClick}
+                          onEditNote={notesHook.handleEditNote}
                           onDeleteNote={notesHook.handleDeleteNote}
                           onArchiveNote={notesHook.handleArchiveNote}
                           onToggleTodoItem={notesHook.handleToggleTodoItem}
@@ -324,6 +326,15 @@ export function App() {
         onCategoryChange={notesHook.setSelectedCategory}
         onSubmit={() => notesHook.handleCreateNote(null)}
         onCancel={() => notesHook.setIsCreating(false)}
+      />
+
+      {/* Modal pro editaci poznámek */}
+      <NoteEditModal
+        note={notesHook.editingNote}
+        isOpen={notesHook.isEditModalOpen}
+        onClose={notesHook.handleCloseEditModal}
+        onSave={notesHook.handleSaveNoteEdit}
+        categories={categories}
       />
     </div>
   );

@@ -4,8 +4,9 @@
  * Obsahuje:
  * - Zobrazení obsahu podle typu poznámky
  * - Drag & Drop funkcionalitu
- * - Akční tlačítka (smazat, archivovat)
+ * - Akční tlačítka (smazat, archivovat, editovat)
  * - Todo položky s možností editace
+ * - Zobrazení stavu dokončení
  * 
  * @author Mike
  * @version 1.0.0
@@ -20,6 +21,7 @@ interface NoteCardProps {
   isDragged: boolean;
   isDragOver: boolean;
   onNoteClick: (note: Note) => void;
+  onEditNote: (note: Note) => void;
   onDeleteNote: (noteId: string) => void;
   onArchiveNote: (noteId: string) => void;
   onToggleTodoItem: (noteId: string, itemId: string) => void;
@@ -46,6 +48,7 @@ export function NoteCard({
   isDragged,
   isDragOver,
   onNoteClick,
+  onEditNote,
   onDeleteNote,
   onArchiveNote,
   onToggleTodoItem,
@@ -73,12 +76,36 @@ export function NoteCard({
       className={`bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-200 cursor-pointer border border-gray-100 hover:border-indigo-200 group
         ${isDragged ? 'opacity-50 scale-95' : ''}
         ${isDragOver ? 'ring-2 ring-indigo-500 ring-opacity-50 scale-105' : ''}
-        ${isDragged ? 'transform-gpu' : ''}`}
+        ${isDragged ? 'transform-gpu' : ''}
+        ${note.completed ? 'opacity-75 bg-green-50/80' : ''}`}
     >
       {/* Header karty */}
       <div className="flex justify-between items-start mb-3">
-        <h3 className="text-lg font-semibold text-gray-900 truncate">{note.title}</h3>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-1 min-w-0">
+          {note.completed && (
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          )}
+          <h3 className={`text-lg font-semibold text-gray-900 truncate ${note.completed ? 'line-through text-gray-500' : ''}`}>
+            {note.title}
+          </h3>
+        </div>
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditNote(note);
+            }}
+            className="p-1 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-100 rounded transition-colors duration-200"
+            title="Upravit poznámku"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -107,7 +134,7 @@ export function NoteCard({
       </div>
 
       {/* Obsah podle typu poznámky */}
-      <div className="text-sm text-gray-600">
+      <div className={`text-sm text-gray-600 ${note.completed ? 'opacity-60' : ''}`}>
         {note.type === 'text' && (
           <p className="line-clamp-3">
             {(note as TextNote).content || 'Bez obsahu'}
@@ -244,6 +271,11 @@ export function NoteCard({
       {/* Metadata poznámky */}
       <div className="mt-4 text-xs text-gray-400">
         Vytvořeno: {new Date(note.createdAt).toLocaleDateString('cs-CZ')}
+        {note.completed && (
+          <span className="ml-2 text-green-600 font-medium">
+            ✓ Dokončeno
+          </span>
+        )}
       </div>
       
       {/* Kategorie */}
