@@ -8,4 +8,5 @@ export default defineConfig({
     port: 5173,
     strictPort: true, // Nepoužívat jiný port, pokud je 5173 obsazený
   },
+  base: '/kaj-notes/', // pro GitHub Pages - název repozitáře
 })

@@ -273,7 +273,7 @@ export function useNotes(session: Session | null) {
   /**
    * Opuštění oblasti poznámky při přetahování
    */
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = () => {
     setDragOverNote(null);
   };
 

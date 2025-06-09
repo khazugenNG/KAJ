@@ -41,11 +41,9 @@ export function App() {
   const [currentPage, setCurrentPage] = useState<'notes' | 'profile' | 'categories' | 'share' | 'archive' | 'stats'>('notes');
 
   // ===== STATE PRO GEOLOKACI =====
-  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
+  // const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
 
   // ===== STATE PRO WEBSOCKET =====
-  const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
   const [realTimeStatus, setRealTimeStatus] = useState<string>('offline');
 
   // ===== STATE PRO MOBILNÍ MENU =====
@@ -94,10 +92,9 @@ export function App() {
     if (session) {
       webSocketService.connect()
         .then(() => {
-          setIsWebSocketConnected(true);
           setRealTimeStatus('online');
           
-          webSocketService.on('heartbeat', (data: any) => {
+          webSocketService.on('heartbeat', () => {
             setRealTimeStatus('online');
           });
           
@@ -115,7 +112,6 @@ export function App() {
 
     return () => {
       webSocketService.disconnect();
-      setIsWebSocketConnected(false);
       setRealTimeStatus('offline');
     };
   }, [session]);
@@ -174,66 +170,10 @@ export function App() {
   };
 
   // ===== GEOLOKACE FUNKCE =====
-  
-  /**
-   * Získání aktuální GPS pozice uživatele
-   */
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('Geolokace není podporována tímto prohlížečem');
-      return;
-    }
-
-    setLocationError(null);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setCurrentLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        });
-      },
-      (error) => {
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setLocationError('Přístup k geolokaci byl zamítnut');
-            break;
-          case error.POSITION_UNAVAILABLE:
-            setLocationError('Informace o poloze není dostupná');
-            break;
-          case error.TIMEOUT:
-            setLocationError('Vypršel časový limit pro získání polohy');
-            break;
-          default:
-            setLocationError('Nastala neznámá chyba při získávání polohy');
-            break;
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
-      }
-    );
-  };
-
-  /**
-   * Vyčištění geolokace
-   */
-  const clearLocation = () => {
-    setCurrentLocation(null);
-    setLocationError(null);
-  };
+  // const clearLocation = () => {};
 
   // ===== HANDLERS PRO POZNÁMKY =====
   
-  /**
-   * Vytvoření nové poznámky s geolokací
-   */
-  const handleCreateNote = async () => {
-    await notesHook.handleCreateNote(currentLocation);
-    clearLocation();
-  };
-
   /**
    * Kliknutí na poznámku
    */

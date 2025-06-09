@@ -12,8 +12,6 @@
  * @version 1.0.0
  */
 
-import React from 'react';
-
 interface HeaderProps {
   currentPage: 'notes' | 'profile' | 'categories' | 'share' | 'archive' | 'stats';
   realTimeStatus: string;
