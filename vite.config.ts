@@ -8,5 +8,16 @@ export default defineConfig({
     port: 5173,
     strictPort: true, // Nepoužívat jiný port, pokud je 5173 obsazený
   },
-  base: './', // relativní cesta pro GitHub Pages
+  base: '/KAJ/', // pro GitHub Pages - název repozitáře
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+      },
+    },
+  },
 })

@@ -1,151 +1,240 @@
 # KajNotes
 
- Webová aplikace pro správu poznámek a úkolů vytvořená jako semestrální práce do předmětu Klientské aplikace v JavaScriptu. Aplikace je inspirovaná Google Keep a poskytuje uživatelům intuitivní rozhraní pro vytváření a správu různých typů poznámek.
+**KajNotes** je moderní webová aplikace pro správu poznámek, úkolů a obrázků, postavená na technologiích React, TypeScript a Tailwind CSS. Umožňuje vytvářet, upravovat a organizovat různé typy poznámek, spravovat kategorie, archivovat poznámky, sledovat statistiky a využívat pokročilé funkce jako drag & drop, geolokaci a real-time aktualizace.
 
-## Cíl projektu
+## Funkce
 
-Cílem projektu je vytvořit webovou aplikaci, která demonstruje znalosti a dovednosti v oblasti vývoje klientských webových aplikací. Aplikace umožňuje uživatelům vytvářet a spravovat různé typy poznámek a úkolů s důrazem na moderní UX/UI design a technologické postupy.
+- **Textové poznámky** – rychlé zápisky, myšlenky, nápady.
+- **To-Do poznámky** – úkolníčky s možností označovat splněné položky.
+- **Obrázkové poznámky** – možnost přidat obrázek s popiskem.
+- **Kategorie** – třídění poznámek do vlastních kategorií.
+- **Archivace** – přesun poznámek do archivu, možnost obnovení nebo smazání.
+- **Statistiky** – přehled o počtu poznámek, úkolech, kategoriích apod.
+- **Drag & Drop** – přetahování poznámek pro změnu pořadí.
+- **Geolokace** – možnost uložit k poznámce aktuální polohu.
+- **Real-time aktualizace** – poznámky se aktualizují v reálném čase (WebSocket).
+- **Uživatelské účty** – registrace, přihlášení, odhlášení.
+- **Responzivní design** – optimalizováno pro mobilní i desktopová zařízení.
+- **Ukládání do LocalStorage** – poznámky a session přetrvávají i po obnovení stránky.
+- **Přehledné rozhraní** – moderní UI s animacemi a přechody (Tailwind CSS).
 
 ## Technologie
 
-- Frontend Framework: React + TypeScript
-- Styling: Tailwind CSS
-- Build Tool: Vite
-- State Management: React Hooks
-- Storage: LocalStorage API
-- Real-time komunikace: WebSocket API
-- Geolokace: Geolocation API
-- Drag & Drop: HTML5 Drag & Drop API
-
-## Implementované požadavky
-
-### HTML5
-- Validní HTML5 dokument s použitím sémantických značek (section, article, nav)
-- Responzivní design pro všechny moderní prohlížeče
-- Multimediální prvky (obrázky)
-- Formulářové prvky s validací, placeholder a autofocus
-- Pokročilé API (Drag & Drop, Geolocation, WebSocket)
-
-### CSS (Tailwind CSS)
-- Pokročilé selektory a pseudotřídy (hover, focus, active)
-- CSS3 transformace a animace
-  - Hover efekty na kartách poznámek
-  - Transitions při interakcích
-  - Transformace při drag & drop operacích
-- Responzivní design pomocí Tailwind breakpointů
-- Vendor prefixy řešeny přes autoprefixer
-
-### JavaScript (React + TypeScript)
-- OOP přístup:
-  - Prototypová dědičnost (třídy Note, TextNote, TodoNote, ImageNote)
-  - Jmenné prostory (NoteTypes, NoteService, WebSocketService, AuthService)
-- JS API:
-  - File API pro nahrávání obrázků
-  - Drag & Drop API pro přeuspořádání poznámek
-  - LocalStorage API pro offline ukládání
-  - Geolocation API pro přidání lokace k poznámkám
-  - WebSocket API pro real-time aktualizace
-- Offline podpora:
-  - LocalStorage pro perzistenci dat
-  - Offline režim s indikátorem připojení
-
-### UX/UI Design
-- Moderní, čistý design inspirovaný Google Keep
-- Responzivní layout pro všechny zařízení
-- Intuitivní ovládání s drag & drop
-- Animace a přechody pro lepší uživatelský zážitek
-- Přístupnost s ARIA atributy a klávesovými zkratkami
-
-## Funkcionalita
-
-### Typy poznámek
-1. Textové poznámky
-   - Nadpis a obsah s textarea
-   - Formátovaný text
-   - Tagy a kategorizace
-
-2. Todo seznamy
-   - Kontrolovatelné položky s možností označení jako dokončené
-   - Priorita úkolů
-   - Termíny splnění
-
-3. Obrázkové poznámky
-   - Nahrávání obrázků přes File API
-   - Popisky a nadpisy
-   - Náhledy s možností zvětšení
-
-### Správa poznámek
-- Vytváření, editace, mazání poznámek
-- Drag & Drop přeuspořádání poznámek
-- Archivace a obnovení poznámek
-- Trvalé mazání z archivu
-- Tagování a kategorizace
-- Barevné označení poznámek
-- Statistiky a přehledy
-
-### Pokročilé funkce
-- Real-time synchronizace přes WebSocket
-- Indikátor připojení k serveru
-- Geolokace pro přidání lokace k poznámkám
-- Offline režim s LocalStorage
-- Drag & Drop pro přeuspořádání
-- Responzivní design pro mobilní zařízení
-
-## Instalace a spuštění
-
-1. Klonování repozitáře:
-   ```bash
-   git clone [url-repozitáře]
-   cd kaj
-   ```
-
-2. Instalace závislostí:
-   ```bash
-   npm install
-   ```
-
-3. Spuštění vývojového serveru:
-   ```bash
-   npm run dev
-   ```
-
-4. Sestavení pro produkci:
-   ```bash
-   npm run build
-   ```
+- **React** (TypeScript)
+- **Vite** (vývojový server)
+- **Tailwind CSS** (styly a animace)
+- **WebSocket** (real-time aktualizace)
+- **Geolocation API** (získání polohy)
+- **LocalStorage** (perzistence dat)
+- **Modulární architektura** (rozděleno do komponent a hooků)
 
 ## Struktura projektu
 
 ```
 src/
-├── components/     # React komponenty
-├── models/        # Třídy pro poznámky
-├── services/      # Služby (NoteService, WebSocketService, AuthService)
-├── types/         # TypeScript typy a rozhraní
-└── App.tsx        # Hlavní komponenta aplikace
+├── components/      // Znovupoužitelné UI komponenty (NoteCard, Header, atd.)
+├── hooks/           // Vlastní React hooky (useNotes, useCategories, ...)
+├── pages/           // Stránky aplikace (ArchivePage, StatsPage, ...)
+├── services/        // Služby pro práci s daty (AuthService, NoteService, ...)
+├── types/           // Sdílené typy (User, Note, Session, ...)
+├── App.tsx          // Hlavní komponenta aplikace
+└── index.tsx        // Vstupní bod aplikace
 ```
 
-## Komentáře ke kódu
+## Spuštění projektu
 
-Kód je důkladně okomentován v češtině s důrazem na:
-- Popis funkcionality jednotlivých komponent
-- Dokumentaci typů a rozhraní
-- Vysvětlení složitějších algoritmů
-- Poznámky k implementaci API
-- Dokumentaci parametrů funkcí
+1. **Instalace závislostí**
+   ```bash
+   npm install
+   ```
 
-## Implementované API
+2. **Spuštění vývojového serveru**
+   ```bash
+   npm run dev
+   ```
+   Výchozí adresa: [http://localhost:5173](http://localhost:5173)  
+   Pokud je port obsazen, použij např. `npm run dev -- --port 5174`.
 
-- **Drag & Drop API**: Pro přeuspořádání poznámek
-- **Geolocation API**: Pro přidání lokace k poznámkám
-- **LocalStorage API**: Pro offline ukládání dat
-- **WebSocket API**: Pro real-time synchronizaci
-- **File API**: Pro nahrávání obrázků
+## Poznámky k použití
 
-## Licence
+- Pro přihlášení můžeš použít testovací účet:
+  - **Email:** `test@example.com`
+  - **Heslo:** `Test123456`
+- Všechna data jsou ukládána pouze do LocalStorage pro účely demonstrace.
+- Aplikace je plně offline-ready (kromě WebSocket funkcí).
 
-Tento projekt je vytvořen jako semestrální práce a není určen pro komerční použití.
+## Vývoj a rozšiřování
+
+- Kód je rozdělen do menších komponent a hooků pro lepší přehlednost a údržbu.
+- Komentáře v kódu jsou v češtině.
+- Pro přidání nové funkce vytvoř novou komponentu nebo hook do příslušné složky.
+
+## Dokumentace
+
+### Architektura aplikace
+
+Aplikace je postavena na modulární architektuře s jasným oddělením zodpovědností:
+
+#### Komponenty (`src/components/`)
+- **Header.tsx** - Responzivní navigační header s hamburger menu
+- **NoteCard.tsx** - Karta poznámky s drag & drop funkcionalitou
+- **AuthPage.tsx** - Stránka pro přihlášení a registraci
+
+#### Hooky (`src/hooks/`)
+- **useNotes.tsx** - Hlavní logika pro správu poznámek (CRUD operace, drag & drop, archivace)
+
+#### Služby (`src/services/`)
+- **AuthService.ts** - Autentifikace a správa uživatelů
+- **NoteService.ts** - Generování unikátních ID a pomocné funkce
+- **WebSocketService.ts** - Real-time komunikace
+
+#### Stránky (`src/pages/`)
+- **ArchivePage.tsx** - Správa archivovaných poznámek
+- **CategoriesPage.tsx** - Správa kategorií
+- **StatsPage.tsx** - Statistiky a přehledy
+- **SharePage.tsx** - Sdílení poznámek
+
+### Typy dat
+
+#### Note (Poznámka)
+```typescript
+interface Note {
+  id: string;
+  type: 'text' | 'todo' | 'image';
+  title: string;
+  content?: string;
+  todoItems?: TodoItem[];
+  imageUrl?: string;
+  imageCaption?: string;
+  categoryId?: string;
+  location?: { lat: number; lng: number };
+  createdAt: string;
+  updatedAt: string;
+  isArchived: boolean;
+}
+```
+
+#### User (Uživatel)
+```typescript
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  password: string; // zahashované
+}
+```
+
+#### Session (Přihlašovací session)
+```typescript
+interface Session {
+  id: string;
+  userId: string;
+  createdAt: string;
+  expiresAt: string;
+  user: User;
+}
+```
+
+### Klíčové funkce
+
+#### Drag & Drop
+- Implementováno pomocí HTML5 Drag & Drop API
+- Poznámky lze přetahovat pro změnu pořadí
+- Vizuální feedback během přetahování
+
+#### Real-time aktualizace
+- WebSocket simulace pro real-time komunikaci
+- Automatické heartbeat zprávy
+- Status indikátor (online/offline)
+
+#### Geolokace
+- Použití HTML5 Geolocation API
+- Možnost uložit GPS souřadnice k poznámkám
+- Ošetření chyb a oprávnění
+
+#### Persistence dat
+- LocalStorage pro ukládání poznámek
+- Session management
+- Automatické zálohování dat
+
+### CSS3 Transitions a Animace
+
+Aplikace využívá rozsáhlé CSS3 transitions a animace:
+
+#### Tailwind CSS Transitions
+- `transition-all duration-200` - plynulé přechody pro všechny vlastnosti
+- `hover:scale-105` - zvětšení při najetí myší
+- `transform transition-transform` - animované transformace
+
+#### Drag & Drop Animace
+- `opacity-50` - průhlednost při přetahování
+- `scale-95` - zmenšení při přetahování
+- `shadow-lg` - stínování pro vizuální feedback
+
+#### Responzivní Animace
+- `sm:` prefix pro různé breakpointy
+- Mobilní hamburger menu s animacemi
+- Plynulé přechody mezi desktop a mobilním zobrazením
+
+### Bezpečnost
+
+#### Autentifikace
+- Hashování hesel pomocí crypto-js
+- Session management s expirací
+- Sanitizace vstupů
+
+#### Validace
+- Email validace
+- Heslo validace (minimálně 8 znaků, velké/malé písmeno, číslo)
+- Username validace (3-20 znaků)
+
+### Nasazení
+
+#### GitHub Pages
+Aplikace je nasazena na GitHub Pages s následující konfigurací:
+
+```typescript
+// vite.config.ts
+export default defineConfig({
+  base: '/KAJ/', // název repozitáře
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+  },
+})
+```
+
+#### Deploy proces
+1. `npm run build` - sestavení produkční verze
+2. `npm run deploy` - nahrání na GitHub Pages
+3. Automatické nasazení na `https://khazugenNG.github.io/KAJ/`
+
+### Testovací účet
+
+Pro demonstraci aplikace je k dispozici testovací účet:
+- **Email:** `test@example.com`
+- **Heslo:** `Test123456`
+
+### Omezení
+
+- Data jsou ukládána pouze do LocalStorage (demonstrační účely)
+- WebSocket je simulován (není skutečné real-time připojení)
+- Geolokace vyžaduje HTTPS nebo localhost
+
+### Budoucí rozšíření
+
+- Backend API pro skutečné ukládání dat
+- Skutečné WebSocket připojení
+- Push notifikace
+- Offline mode s Service Workers
+- Export/import poznámek
+- Sdílení poznámek mezi uživateli
 
 ## Autoři
 
 - Mike (2024)
+- [Tvůj GitHub profil nebo kontakt]
+
+---
+
+Tento projekt je vytvořen jako semestrální práce a není určen pro komerční použití.
