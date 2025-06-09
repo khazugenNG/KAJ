@@ -22,6 +22,7 @@ import { ArchivePage } from './pages/ArchivePage';
 import { StatsPage } from './pages/StatsPage';
 import { Header } from './components/Header';
 import { NoteCard } from './components/NoteCard';
+import { NoteForm } from './components/NoteForm';
 import { useNotes } from './hooks/useNotes';
 import type { Session } from './types/User';
 import type { Note } from './types/Note';
@@ -302,6 +303,28 @@ export function App() {
       ) : (
         <AuthPage onLogin={handleLogin} onRegister={handleRegister} />
       )}
+
+      {/* Formulář pro vytváření nových poznámek */}
+      <NoteForm
+        isCreating={notesHook.isCreating}
+        newNoteType={notesHook.newNoteType}
+        newNoteTitle={notesHook.newNoteTitle}
+        newNoteContent={notesHook.newNoteContent}
+        newTodoItems={notesHook.newTodoItems}
+        newImage={notesHook.newImage}
+        newImageCaption={notesHook.newImageCaption}
+        selectedCategory={notesHook.selectedCategory}
+        categories={categories}
+        onTypeChange={notesHook.setNewNoteType}
+        onTitleChange={notesHook.setNewNoteTitle}
+        onContentChange={notesHook.setNewNoteContent}
+        onTodoItemsChange={notesHook.setNewTodoItems}
+        onImageChange={notesHook.setNewImage}
+        onImageCaptionChange={notesHook.setNewImageCaption}
+        onCategoryChange={notesHook.setSelectedCategory}
+        onSubmit={() => notesHook.handleCreateNote(null)}
+        onCancel={() => notesHook.setIsCreating(false)}
+      />
     </div>
   );
 }
