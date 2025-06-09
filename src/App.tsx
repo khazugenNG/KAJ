@@ -1,0 +1,367 @@
+/**
+ * Hlavní komponenta aplikace KajNotes
+ * 
+ * Tato komponenta obsahuje:
+ * - Autentifikaci uživatelů
+ * - Správu poznámek (CRUD operace)
+ * - Geolokaci pro poznámky
+ * - WebSocket real-time připojení
+ * - Navigaci mezi stránkami
+ * 
+ * @author Mike
+ * @version 1.0.0
+ */
+
+import { useState, useEffect } from 'react';
+import { AuthService } from './services/AuthService';
+import { webSocketService } from './services/WebSocketService';
+import { AuthPage } from './pages/AuthPage';
+import { CategoriesPage } from './pages/CategoriesPage';
+import { SharePage } from './pages/SharePage';
+import { ArchivePage } from './pages/ArchivePage';
+import { StatsPage } from './pages/StatsPage';
+import { Header } from './components/Header';
+import { NoteCard } from './components/NoteCard';
+import { useNotes } from './hooks/useNotes';
+import type { Session } from './types/User';
+import type { Note } from './types/Note';
+
+// Inicializace služeb
+const authService = new AuthService();
+
+/**
+ * Hlavní komponenta aplikace
+ * Spravuje celkový stav aplikace a navigaci
+ */
+export function App() {
+  // ===== STATE PRO SPRÁVU UŽIVATELŮ =====
+  const [session, setSession] = useState<Session | null>(null);
+
+  // ===== STATE PRO NAVIGACI =====
+  const [currentPage, setCurrentPage] = useState<'notes' | 'profile' | 'categories' | 'share' | 'archive' | 'stats'>('notes');
+
+  // ===== STATE PRO GEOLOKACI =====
+  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  // ===== STATE PRO WEBSOCKET =====
+  const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
+  const [realTimeStatus, setRealTimeStatus] = useState<string>('offline');
+
+  // ===== STATE PRO MOBILNÍ MENU =====
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // ===== KONFIGURACE KATEGORIÍ =====
+  const categories = [
+    { id: '1', name: 'Práce', color: 'indigo' },
+    { id: '2', name: 'Osobní', color: 'purple' },
+    { id: '3', name: 'Studium', color: 'pink' },
+    { id: '4', name: 'Nákupy', color: 'green' },
+    { id: '5', name: 'Zdraví', color: 'red' },
+  ];
+
+  // ===== CUSTOM HOOKS =====
+  const notesHook = useNotes(session);
+
+  // ===== USE EFFECT HOOKS =====
+  
+  /**
+   * Načtení uložené session při startu aplikace
+   */
+  useEffect(() => {
+    const savedSession = localStorage.getItem('noteflow-current-session');
+    if (savedSession) {
+      try {
+        const { sessionId, userId } = JSON.parse(savedSession);
+        setSession({ 
+          id: sessionId, 
+          userId: userId,
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          user: { id: userId, username: 'Uživatel', email: 'user@example.com', password: '' } 
+        });
+      } catch (error) {
+        console.error('Chyba při načítání session:', error);
+        localStorage.removeItem('noteflow-current-session');
+      }
+    }
+  }, []);
+
+  /**
+   * WebSocket připojení pro real-time funkcionalitu
+   */
+  useEffect(() => {
+    if (session) {
+      webSocketService.connect()
+        .then(() => {
+          setIsWebSocketConnected(true);
+          setRealTimeStatus('online');
+          
+          webSocketService.on('heartbeat', (data: any) => {
+            setRealTimeStatus('online');
+          });
+          
+          webSocketService.on('note_updated', (data: any) => {
+            console.log('Real-time aktualizace poznámky:', data);
+          });
+          
+          webSocketService.simulateRealTimeUpdates();
+        })
+        .catch((error) => {
+          console.error('Chyba při připojení WebSocket:', error);
+          setRealTimeStatus('error');
+        });
+    }
+
+    return () => {
+      webSocketService.disconnect();
+      setIsWebSocketConnected(false);
+      setRealTimeStatus('offline');
+    };
+  }, [session]);
+
+  // ===== AUTENTIFIKAČNÍ FUNKCE =====
+  
+  /**
+   * Přihlášení uživatele
+   */
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      const result = await authService.login(email, password);
+      setSession(result.session);
+      localStorage.setItem('noteflow-current-session', JSON.stringify({
+        sessionId: result.session.id,
+        userId: result.user.id
+      }));
+    } catch (err) {
+      console.error('Login failed:', err);
+      throw err;
+    }
+  };
+
+  /**
+   * Registrace nového uživatele
+   */
+  const handleRegister = async (username: string, email: string, password: string) => {
+    try {
+      await authService.register(username, email, password);
+      const result = await authService.login(email, password);
+      setSession(result.session);
+      localStorage.setItem('noteflow-current-session', JSON.stringify({
+        sessionId: result.session.id,
+        userId: result.user.id
+      }));
+    } catch (err) {
+      console.error('Registration failed:', err);
+      throw err;
+    }
+  };
+
+  /**
+   * Odhlášení uživatele
+   */
+  const handleLogout = async () => {
+    try {
+      if (session) {
+        await authService.logout(session.id);
+      }
+      setSession(null);
+      localStorage.removeItem('noteflow-current-session');
+      notesHook.setSelectedNote(null);
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
+  // ===== GEOLOKACE FUNKCE =====
+  
+  /**
+   * Získání aktuální GPS pozice uživatele
+   */
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolokace není podporována tímto prohlížečem');
+      return;
+    }
+
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCurrentLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+      },
+      (error) => {
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError('Přístup k geolokaci byl zamítnut');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError('Informace o poloze není dostupná');
+            break;
+          case error.TIMEOUT:
+            setLocationError('Vypršel časový limit pro získání polohy');
+            break;
+          default:
+            setLocationError('Nastala neznámá chyba při získávání polohy');
+            break;
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  };
+
+  /**
+   * Vyčištění geolokace
+   */
+  const clearLocation = () => {
+    setCurrentLocation(null);
+    setLocationError(null);
+  };
+
+  // ===== HANDLERS PRO POZNÁMKY =====
+  
+  /**
+   * Vytvoření nové poznámky s geolokací
+   */
+  const handleCreateNote = async () => {
+    await notesHook.handleCreateNote(currentLocation);
+    clearLocation();
+  };
+
+  /**
+   * Kliknutí na poznámku
+   */
+  const handleNoteClick = (note: Note) => {
+    notesHook.setSelectedNote(note);
+  };
+
+  // ===== RENDER =====
+  
+  return (
+    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+      {session ? (
+        <>
+          {/* Header s navigací */}
+          <Header
+            currentPage={currentPage}
+            realTimeStatus={realTimeStatus}
+            username={session.user.username}
+            isMobileMenuOpen={isMobileMenuOpen}
+            onPageChange={setCurrentPage}
+            onLogout={handleLogout}
+            onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          />
+
+          <main className="flex-1 overflow-y-auto">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              {currentPage === 'notes' && (
+                <div className="p-4 sm:p-8 min-h-full">
+                  {/* Header sekce */}
+                  <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Moje poznámky</h2>
+                    <button 
+                      onClick={() => notesHook.setIsCreating(true)} 
+                      className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center sm:justify-start"
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Nová poznámka
+                    </button>
+                  </div>
+
+                  {/* Uvítací box pro prázdný stav */}
+                  {notesHook.notes.length === 0 && !notesHook.isCreating && (
+                    <div className="flex flex-col items-center justify-center mt-32">
+                      <div className="bg-white/90 rounded-xl shadow-lg p-8 flex flex-col items-center">
+                        <svg className="w-16 h-16 text-indigo-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                          <rect x="8" y="8" width="32" height="32" rx="6" strokeWidth="3" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M16 20h16M16 28h10" />
+                        </svg>
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Vítejte v KajNotes!</h3>
+                        <p className="text-gray-600 mb-4 text-center">Začněte přidáním nové poznámky pomocí tlačítka vpravo nahoře.<br />Vaše poznámky se zobrazí zde.</p>
+                        <button 
+                          onClick={() => notesHook.setIsCreating(true)} 
+                          className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow hover:from-indigo-700 hover:to-purple-700 transition-all"
+                        >
+                          + Nová poznámka
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Seznam poznámek */}
+                  {notesHook.notes.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      {notesHook.notes.map((note) => (
+                        <NoteCard
+                          key={note.id}
+                          note={note}
+                          categories={categories}
+                          isDragged={notesHook.draggedNote === note.id}
+                          isDragOver={notesHook.dragOverNote === note.id}
+                          onNoteClick={handleNoteClick}
+                          onDeleteNote={notesHook.handleDeleteNote}
+                          onArchiveNote={notesHook.handleArchiveNote}
+                          onToggleTodoItem={notesHook.handleToggleTodoItem}
+                          onStartEditTodoItem={notesHook.handleStartEditTodoItem}
+                          onDeleteTodoItem={notesHook.handleDeleteTodoItem}
+                          onAddTodoItem={notesHook.handleAddTodoItem}
+                          onDragStart={notesHook.handleDragStart}
+                          onDragOver={notesHook.handleDragOver}
+                          onDragLeave={notesHook.handleDragLeave}
+                          onDrop={notesHook.handleDrop}
+                          onDragEnd={notesHook.handleDragEnd}
+                          editingTodoItem={notesHook.editingTodoItem}
+                          onSaveTodoItemEdit={notesHook.handleSaveTodoItemEdit}
+                          onCancelTodoItemEdit={notesHook.handleCancelTodoItemEdit}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Ostatní stránky */}
+              {currentPage === 'categories' && (
+                <CategoriesPage 
+                  notes={notesHook.notes}
+                  onCategorySelect={(categoryId) => {
+                    console.log('Selected category:', categoryId);
+                  }}
+                  onBackToNotes={() => {
+                    console.log('Back to notes');
+                  }}
+                />
+              )}
+              {currentPage === 'share' && <SharePage />}
+              {currentPage === 'archive' && (
+                <ArchivePage 
+                  notes={notesHook.notes}
+                  archivedNotes={notesHook.archivedNotes}
+                  onArchiveNote={notesHook.handleArchiveNote}
+                  onRestoreNote={notesHook.handleRestoreNote}
+                  onDeleteNote={notesHook.handleDeleteFromArchive}
+                />
+              )}
+              {currentPage === 'stats' && (
+                <StatsPage 
+                  notes={notesHook.notes}
+                  archivedNotes={notesHook.archivedNotes}
+                />
+              )}
+            </div>
+          </main>
+        </>
+      ) : (
+        <AuthPage onLogin={handleLogin} onRegister={handleRegister} />
+      )}
+    </div>
+  );
+}
